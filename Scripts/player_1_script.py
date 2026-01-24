@@ -4,6 +4,7 @@ Script for player 1
 Jack Pearson
 """
 
-import character_script
+import character_script as cs
 
-team = [character_script.Mage]
+team = ["Blank","Blank","Blank"]
+defeated = False

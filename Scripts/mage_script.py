@@ -1,7 +1,9 @@
 """
 Mage character type
 """
-name = "Wizard"
+name = "Mage"
+dmgT = 1 # Int denotes that this character dels pyschic based damage
+
 
 # Life stats
 max_hp = 150 # maximum health value
@@ -25,28 +27,28 @@ if current_fort < 0: # stops the player's fortification going below 0
     current_def = 0
 
 # Resource stats
-max_mana = 20
+max_mana = 25
 mana = max_mana # resource for magic skills
-max_stamina = 1
-stamina = max_stamina # resource for non-magic skills
 rest_value = 5 # How much mana and stamina are restored during a rest
 
 # Status stats
 res = 0 # multiplied by 10 gives percentile chance to resist a debuff
 stat_modifs = [0, 0, 0, 0, 0]
 
+hasArcaneShield = False
+
 #region Skills
 def Spark(cost):
     global mana
     mana -= cost
     skillDMG = 5 * (1 + (current_psy/ 10)) 
-    return skillDMG
+    return int(skillDMG)
 
 def MagicMissile(cost):
     global mana
     mana -= cost
     skillDMG = 15 * (1 + (current_psy/ 10))
-    return skillDMG   
+    return int(skillDMG)   
 
 def ArcaneShield(cost):
     global mana, current_fort, current_def   
@@ -60,24 +62,28 @@ def Storm(cost):
     mana -= cost
     current_psy += 5
     skillDMG = 25 * (1 + (current_psy/ 10)) 
-    return skillDMG
+    return int(skillDMG)
 
-def Rest():
-    global mana, stamina, rest_value
+def Rest(cost):
+    global mana, rest_value
     GainHealth(50)
     mana += rest_value
     if mana > max_mana: # stops mana overflow
         mana = max_mana
-    stamina += rest_value
-    if stamina > max_stamina: # stops stamina overflow
-        stamina = max_stamina
-    print("The",name+"'s mana is now at",mana,"and their stamina is",stamina)
+    print("The",name+"'s mana is now at",mana)
 
 
 skills = [Spark, MagicMissile, ArcaneShield, Storm, Rest]
-skillCosts = [1, 5, 10, 15]
+skillCosts = [1, 5, 10, 15, 0]
+skillsDescription = ["[0] "+skills[0].__name__+": consumes 1 mana to deal a small amount of damage to one enemy.",
+                     "[1] "+skills[1].__name__+": consumes 5 mana to deal damage to an enemy",
+                     "[2] "+skills[2].__name__+": consumes 10 mana and lowers self's incoming damage",
+                     "[3] "+skills[3].__name__+": consumes 15 and deals very high damage",
+                     "[4] "+skills[4].__name__+": heals character for 50HP and restores "+str(rest_value)+" mana."]
+
 #endregion
 
+#region Health Functions
 def CheckHealth():
     global current_hp, max_hp, dead
     
@@ -96,13 +102,13 @@ def TakeDamage(type, amount):
         CheckHealth()
         return
       
-    if type == 0:
-        damage = amount * (1 - current_def/10)
+    if type == 0: # Attack based damage
+        damage = float(amount) * (1 - current_def/10)
         current_hp -= damage
         print("The",name,"has taken",damage,"damage")   
 
-    elif type == 1:
-        damage = amount * (1 - current_fort/10)
+    elif type == 1: # Pyschic type damage
+        damage = float(amount) * (1 - current_fort/10)
         current_hp -= damage
         print("The",name,"has taken",damage,"damage")   
 
@@ -121,3 +127,4 @@ def GainHealth(amount):
     print("The",name,"was healed for:",amount,"HP and is now at",current_hp,"HP")
     if current_hp > max_hp:
         current_hp = max_hp
+#endregion

@@ -2,6 +2,7 @@
 Barbarian character type
 """
 name = "Barbarian"
+dmgT = 0 # Int denotes that this character dels attack based damage
 
 #region Stats
 # Life statss
@@ -26,10 +27,8 @@ if current_fort < 0: # stops the player's fortification going below 0
     current_def = 0
 
 # Resource stats
-max_mana =  1
+max_mana =  20
 mana = max_mana # resource for magic skills
-max_stamina = 20
-stamina = max_stamina # resource for non-magic skills
 rest_value = 5 # How much mana and stamina are restored during a rest
 
 # Status stats
@@ -39,55 +38,59 @@ stat_modifs = [0, 0, 0, 0, 0]
 
 #region Skills
 def Whack(cost):
-    global stamina
-    stamina -= cost
+    global mana
+    mana -= cost
     skillDMG = 5 * (1 + (current_attk / 10)) 
-    return skillDMG
+    
+    return int(skillDMG)
 
 def FuriousBlow(cost):
-    global stamina, current_hp
-    stamina -= cost
+    global mana, current_hp
+    mana -= cost
     skillCost = 10
     if current_hp - skillCost > 0:
         current_hp -= skillCost
         skillDMG = 20 * (1 + (current_attk / 10))
-        return skillDMG
     else:
         skillDMG = 10 * (1 + (current_attk / 10))
-        return skillDMG   
+    
+    return int(skillDMG)  
 
 def GreaterRestore(cost):
-    global stamina
-    stamina -= cost
+    global mana
+    mana -= cost
     GainHealth(100)
 
 def Rage(cost):
-    global stamina, current_hp, current_attk
-    stamina -= cost
+    global mana, current_hp, current_attk
+    mana -= cost
     skillCost = 50
     if current_hp - skillCost > 0:
         current_hp -= skillCost
         current_attk += 10
         skillDMG = 20 * (1 + (current_attk / 10))
-        return skillDMG
     else:
         current_attk += 10
-        return 0
+        skillDMG = 0
+
+    return int(skillDMG)
     
-def Rest():
-    global mana, stamina, rest_value
+def Rest(cost):
+    global mana, mana, rest_value
     GainHealth(50)
     mana += rest_value
     if mana > max_mana: # stops mana overflow
         mana = max_mana
-    stamina += rest_value
-    if stamina > max_stamina: # stops stamina overflow
-        stamina = max_stamina
-    print("The",name+"'s mana is now at",mana,"and their stamina is",stamina)
+    print("The",name+"'s mana is now at",mana)
 
 
 skills = [Whack, FuriousBlow, GreaterRestore, Rage, Rest]
-skillCosts = [1, 5, 10, 15]
+skillCosts = [1, 5, 10, 15, 0]
+skillsDescription = ["[0] "+skills[0].__name__+": consumes 1 mana to deal a small amount of damage to one enemy.",
+                     "[1] "+skills[1].__name__+": consumes 5 mana to deal damage to an enemy. If current health is greater then 10, it will consume 10HP and do double damage.",
+                     "[2] "+skills[2].__name__+": consumes 10 mana and heals self for 100HP.",
+                     "[3] "+skills[3].__name__+": consumes 15 and increases damage delt. If health is above 50 when cast, it will aditionally deal damage.",
+                     "[4] "+skills[4].__name__+": heals character for 50HP and restores "+str(rest_value)+" mana."]
 #endregion
 
 #region Health Functions
@@ -109,13 +112,13 @@ def TakeDamage(type, amount):
         CheckHealth()
         return
       
-    if type == 0:
-        damage = amount * (1 - current_def/10)
+    if type == 0: # Attack based damage
+        damage = float(amount) * (1 - current_def/10)
         current_hp -= damage
         print("The",name,"has taken",damage,"damage")   
 
-    elif type == 1:
-        damage = amount * (1 - current_fort/10)
+    elif type == 1: # Pyschic type damage
+        damage = float(amount) * (1 - current_fort/10)
         current_hp -= damage
         print("The",name,"has taken",damage,"damage")   
 

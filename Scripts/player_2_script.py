@@ -4,6 +4,6 @@ Script for player 2
 Jack Pearson
 """
 
-import character_script
+import character_script as cs
 
-team = [character_script.Barbarian]
+team = ["Blank","Blank","Blank"]
